@@ -82,4 +82,6 @@ func Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Status(r, 200)
+	// TODO: Serialise interface{}
+	render.JSON(w, r, models.HTTPResponse{Data: name})
 }
