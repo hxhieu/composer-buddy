@@ -5,10 +5,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/jwtauth"
+
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 	"github.com/hxhieu/composer-buddy/routes"
+	"github.com/hxhieu/composer-buddy/routes/auth"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -29,9 +32,17 @@ func main() {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	// Routes
-	r.Route("/api/auth", routes.AuthRoute)
-	r.Route("/api/project", routes.ProjectRoute)
+	// Public routes
+	r.Group(func(r chi.Router) {
+		r.Route("/api/auth", routes.AuthRoute)
+	})
+
+	// Projected routes
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(auth.GetJwtSigner()))
+		r.Use(jwtauth.Authenticator)
+		r.Route("/api/project", routes.ProjectRoute)
+	})
 
 	// Port
 	port := os.Getenv("COMPOSER_BUDDY_PORT")

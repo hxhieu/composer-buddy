@@ -13,15 +13,14 @@ import (
 	"github.com/hxhieu/composer-buddy/models"
 )
 
-// LoginRequest struct
-type LoginRequest struct {
-	User     string `json:"user"`
-	Password string `json:"password"`
+// GetJwtSigner returns the JWT signer that uses our secret
+func GetJwtSigner() *jwtauth.JWTAuth {
+	signingKey := os.Getenv("COMPOSER_BUDDY_SIGNING_KEY")
+	return jwtauth.New("HS256", []byte(signingKey), nil)
 }
 
 // Login is validating the payload and issue the corresponding JWT
 func Login(w http.ResponseWriter, r *http.Request) {
-	signingKey := os.Getenv("COMPOSER_BUDDY_SIGNING_KEY")
 	acceptUser := os.Getenv("COMPOSER_BUDDY_USER")
 	acceptPassword := os.Getenv("COMPOSER_BUDDY_PASSWORD")
 	var defaultExp int64
@@ -32,7 +31,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var loginRequest LoginRequest
+	var loginRequest models.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
 		render.Status(r, 401)
 		render.JSON(w, r, models.HTTPResponse{Error: err.Error()})
@@ -45,8 +44,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenAuth := jwtauth.New("HS256", []byte(signingKey), nil)
-	_, jwt, _ := tokenAuth.Encode(jwt.MapClaims{
+	_, jwt, _ := GetJwtSigner().Encode(jwt.MapClaims{
 		"iss": "composer-buddy",
 		"exp": time.Now().Unix() + defaultExp,
 	})

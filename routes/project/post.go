@@ -12,11 +12,6 @@ import (
 	"github.com/hxhieu/composer-buddy/models"
 )
 
-// CreateProjectResult represents the result of create project API
-type CreateProjectResult struct {
-	Name string `json:"name"`
-}
-
 // Post is creating the project
 func Post(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(1048576) // 1 MB
@@ -88,7 +83,7 @@ func Post(w http.ResponseWriter, r *http.Request) {
 
 	render.Status(r, 200)
 	render.JSON(w, r, models.HTTPResponse{
-		Data: CreateProjectResult{
+		Data: models.CreateProjectResult{
 			Name: name,
 		},
 	})
