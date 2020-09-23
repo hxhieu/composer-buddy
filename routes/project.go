@@ -9,4 +9,5 @@ import (
 func ProjectRoute(r chi.Router) {
 	r.Post("/", project.Post)
 	r.Patch("/", project.Patch)
+	r.Get("/", project.List)
 }
